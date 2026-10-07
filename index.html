@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#FFC2DA">
+<title>ลิสต์ของใช้ลูกน้อย</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23FFC2DA'/%3E%3Cpath d='M22 18h20l8 8-6 5-3-3v20H23V28l-3 3-6-5z' fill='%23FF6FA5'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mali:wght@500;600;700&family=Mitr:wght@400;500&family=Anuphan:wght@400;500;600&display=swap">
+<style>
+/* Layout: one narrow column, sticky summary + tabs on top, categories as quiet sections, item rows expand in place to a price comparison */
+:root{
+  --bg:#FFFFFF; --surface:#FFFFFF; --sunk:#FFEEF5; --line:#FFD6E6;
+  --ink:#3B2A36; --muted:#9A7A8C; --accent:#FF6FA5; --accent-ink:#FFFFFF;
+  --best:#FFF06A; --best-ink:#5C4700; --done:#20C59A; --danger:#FF5A5F;
+  --mint:#C9FBEA; --sky:#D4EEFF; --peach:#FFE0CC; --lilac:#EADFFF;
+  --hero:linear-gradient(120deg,#FFC2DA 0%,#FFE3A3 50%,#B8F0FF 100%);
+  --f-display:"Mali","Mitr",system-ui,sans-serif;
+  --f-body:"Anuphan","Noto Sans Thai",system-ui,sans-serif;
+  color-scheme:light;
+}
+
+*{box-sizing:border-box}
+html{padding-block:env(safe-area-inset-top,0px) env(safe-area-inset-bottom,0px)}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-body);padding-inline:16px;padding-block:0 48px}
+.wrap{max-width:720px;margin:0 auto}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:12px 10px;display:grid;gap:10px}
+.hero{background:var(--hero);border-radius:22px;padding:16px 18px;display:flex;gap:14px;align-items:center}
+.hero svg{flex:none;width:58px;height:58px}
+.hero>div{min-width:0}
+h1{font:700 1.6rem/1.2 var(--f-display);margin:0;text-wrap:balance}
+.sub{color:var(--ink);opacity:.75;font-size:.85rem;margin:2px 0 0}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.stat{background:var(--surface);border:0;border-radius:16px;padding:8px 10px;min-width:0}
+.stat:nth-child(1){background:var(--mint)}.stat:nth-child(2){background:var(--peach)}.stat:nth-child(3){background:var(--lilac)}
+.stat b{display:block;font:700 1.15rem/1.3 var(--f-display);font-variant-numeric:tabular-nums}
+.stat span{font-size:.75rem;color:var(--muted)}
+.bar{height:10px;border-radius:999px;background:var(--sunk);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--done),var(--accent));width:0;transition:width .4s}
+.tabs{display:flex;gap:4px;background:var(--sunk);padding:4px;border-radius:999px}
+.tabs button{flex:1;border:0;background:none;padding:7px;border-radius:999px;cursor:pointer;color:var(--muted)}
+.tabs button[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);font-weight:600;box-shadow:0 1px 2px rgb(0 0 0/.08)}
+
+.tools{display:flex;flex-wrap:wrap;gap:8px;padding-block:14px 4px;align-items:center}
+.tools input[type=search]{flex:1 1 180px;min-width:0;padding:8px 12px;border:2px solid var(--line);border-radius:999px;background:var(--surface)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 12px;font-size:.85rem;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn{border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:7px 16px;cursor:pointer;font-weight:600}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.small{padding:3px 10px;font-size:.82rem}
+.btn.danger{border-color:var(--danger);color:var(--danger);background:transparent}
+.btn.danger.arm{background:var(--danger);color:var(--accent-ink)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+.panel{background:var(--surface);border:2px dashed var(--line);border-radius:20px;padding:14px;display:grid;gap:10px;margin-top:10px}
+.row{display:flex;flex-wrap:wrap;gap:8px}
+.row>*{min-width:0}
+.field{padding:7px 12px;border:2px solid var(--line);border-radius:12px;background:var(--bg)}
+.grow{flex:1 1 160px}
+
+section.cat{margin-top:18px;background:var(--surface);border:2px solid var(--line);border-radius:20px;padding:12px 14px 4px;box-shadow:0 4px 14px rgb(255 111 165/.12)}
+section.cat:nth-of-type(4n+1) h2 .dot{background:var(--accent)}
+section.cat:nth-of-type(4n+2) h2 .dot{background:var(--done)}
+section.cat:nth-of-type(4n+3) h2 .dot{background:#FFB627}
+section.cat:nth-of-type(4n) h2 .dot{background:#4DB8FF}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:8px;vertical-align:1px}
+section.cat h2{font:600 1.1rem/1.3 var(--f-display);margin:0 0 6px;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+section.cat h2 small{font:600 .78rem var(--f-body);color:var(--muted);background:var(--sunk);border-radius:999px;padding:2px 10px}
+ul.items{list-style:none;margin:0;padding:0}
+li.item{border-top:1px dashed var(--line)}
+.line{display:flex;align-items:center;gap:10px;padding:9px 2px}
+.line input[type=checkbox]{width:22px;height:22px;accent-color:var(--done);flex:none;cursor:pointer}
+.name{flex:1;min-width:0;text-align:left;background:none;border:0;padding:0;cursor:pointer;display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
+.name .qty{color:var(--muted);font-size:.82rem}
+li.done .name .t{text-decoration:line-through;color:var(--muted)}
+.tag{flex:none;font-size:.8rem;border-radius:999px;padding:2px 10px;white-space:nowrap}
+.tag.best{background:var(--best);color:var(--best-ink)}
+.tag.paid{background:var(--mint);color:var(--done);font-weight:600}
+.tag.none{color:var(--muted)}
+.detail{padding:4px 0 14px 30px;display:grid;gap:12px}
+.detail h3{font:600 .78rem var(--f-body);letter-spacing:.04em;color:var(--muted);margin:0}
+.note{color:var(--muted);font-size:.88rem}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+td{padding:6px 6px;border-bottom:1px dashed var(--line);vertical-align:middle}
+td.p{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
+td.meta{color:var(--muted);font-size:.78rem}
+tr.cheap td.p{color:var(--done)}
+.diff{color:var(--muted);font-weight:400;font-size:.78rem;display:block}
+.old{font-size:.82rem;color:var(--muted)}
+.old summary{cursor:pointer}
+.old li{padding:2px 0}
+a{color:var(--accent)}
+.iconx{border:0;background:none;color:var(--muted);cursor:pointer;padding:2px 6px}
+
+.empty{padding:28px 16px;text-align:center;color:var(--muted);border:2px dashed var(--line);border-radius:20px;background:var(--surface);margin-top:18px}
+.log{list-style:none;padding:0;margin:0}
+.log h4{font:600 .95rem var(--f-display);margin:18px 0 6px;color:var(--muted)}
+.ent{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);align-items:flex-start}
+.ent img{width:24px;height:24px;border-radius:50%;flex:none}
+.ent .tx{flex:1;min-width:0}
+.ent time{color:var(--muted);font-size:.78rem;white-space:nowrap}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:999px;font-size:.88rem;max-width:calc(100% - 32px)}
+.modal{position:fixed;inset:0;background:rgb(59 42 54/.35);display:grid;place-items:center;padding:16px;z-index:20}
+.modal form{background:var(--surface);border-radius:24px;padding:22px;max-width:360px;width:100%;display:grid;gap:12px;box-shadow:0 10px 40px rgb(255 111 165/.25)}
+.modal h2{font:700 1.25rem var(--f-display);margin:0}
+.sync{font-size:.75rem;color:var(--muted);text-align:right;min-height:1em}
+.who-btn{border:0;background:rgb(255 255 255/.7);border-radius:999px;padding:2px 10px;font-size:.8rem;cursor:pointer;margin-left:4px}
+.setup{background:var(--surface);border:2px dashed var(--accent);border-radius:20px;padding:18px;margin-top:18px}
+.setup ol{padding-left:20px;margin:8px 0}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+<script src="config.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="hero">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="30" fill="var(--surface)"/><path d="M22 18h20l8 8-6 5-3-3v20H23V28l-3 3-6-5z" fill="var(--accent)"/><path d="M27 18a5 5 0 0 0 10 0" fill="var(--surface)"/><circle cx="29" cy="36" r="2" fill="var(--surface)"/><circle cx="35" cy="36" r="2" fill="var(--surface)"/><path d="M29 41q3 3 6 0" stroke="var(--surface)" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      <div><h1>ลิสต์ของใช้ลูกน้อย</h1>
+      <p class="sub"><span id="who">เตรียมของรอเจ้าตัวเล็กด้วยกัน</span><button class="who-btn" id="changeName" type="button" hidden>เปลี่ยนชื่อ</button></p></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="sDone" class="num">–</b><span>ซื้อแล้ว</span></div>
+      <div class="stat"><b id="sPaid" class="num">–</b><span>จ่ายไปแล้ว</span></div>
+      <div class="stat"><b id="sLeft" class="num">–</b><span id="sLeftL">ประมาณที่เหลือ (ถูกสุด)</span></div>
+    </div>
+    <div class="bar" aria-hidden="true"><i id="pbar"></i></div>
+    <div class="sync" id="sync"></div>
+    <div class="tabs" role="tablist">
+      <button role="tab" id="tab-list" aria-selected="true" data-tab="list">เช็คลิสต์</button>
+      <button role="tab" id="tab-log" aria-selected="false" data-tab="log">ประวัติ</button>
+    </div>
+  </header>
+
+  <main id="view-list">
+    <div class="tools">
+      <input type="search" id="q" placeholder="ค้นหาของ เช่น ขวดนม" aria-label="ค้นหา">
+      <button class="btn ghost" id="addToggle" type="button">＋ เพิ่มรายการ</button>
+    </div>
+    <div class="chips" id="filters">
+      <button class="chip" data-f="all" aria-pressed="true">ทั้งหมด</button>
+      <button class="chip" data-f="todo" aria-pressed="false">ยังไม่ซื้อ</button>
+      <button class="chip" data-f="done" aria-pressed="false">ซื้อแล้ว</button>
+      <button class="chip" data-f="noprice" aria-pressed="false">ยังไม่มีราคา</button>
+    </div>
+    <form class="panel" id="addForm" hidden>
+      <div class="row">
+        <input class="field grow" id="newName" required placeholder="ชื่อของ">
+        <input class="field" id="newQty" placeholder="จำนวน เช่น 6 ชิ้น" style="flex:0 1 140px">
+      </div>
+      <div class="row">
+        <select class="field grow" id="newCat" aria-label="หมวด"></select>
+        <button class="btn" type="submit">เพิ่ม</button>
+      </div>
+    </form>
+    <div id="list"><div class="empty">กำลังโหลดรายการ…</div></div>
+  </main>
+
+  <main id="view-log" hidden>
+    <div id="logList"><div class="empty">กำลังโหลดประวัติ…</div></div>
+  </main>
+</div>
+<div class="toast" id="toast" hidden></div>
+<datalist id="shops"></datalist>
+
+<div class="modal" id="nameModal" hidden>
+  <form id="nameForm">
+    <h2>คุณชื่ออะไรคะ</h2>
+    <p class="note" style="margin:0">ชื่อนี้จะขึ้นในประวัติ ว่าใครติ๊กหรือใส่ราคา</p>
+    <input class="field" id="nameInput" required maxlength="40" placeholder="เช่น พ่อบอล, แม่ฝน">
+    <button class="btn" type="submit">เริ่มใช้งาน</button>
+  </form>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
